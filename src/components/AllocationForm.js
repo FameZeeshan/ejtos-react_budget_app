@@ -1,18 +1,30 @@
-// AllocationForm.js
-
 import React, { useContext, useState } from "react";
 import { AppContext } from "../context/AppContext";
 
 const AllocationForm = () => {
-  const { dispatch, remaining } = useContext(AppContext);
+  const { dispatch, remaining, currency } = useContext(AppContext);
 
   const [name, setName] = useState("");
   const [cost, setCost] = useState("");
-  const [action, setAction] = useState("");
+
+  const handleCostChange = (event) => {
+    // Check if the input is a number
+    if (isNaN(event.target.value)) {
+      alert("Please enter a valid number for the allocation.");
+      return;
+    }
+
+    // Convert input value to a number
+    const inputValue = parseInt(event.target.value);
+    setCost(inputValue);
+  };
 
   const submitEvent = () => {
+    // Check if the cost is greater than the remaining budget
     if (cost > remaining) {
-      alert("The value cannot exceed remaining funds £" + remaining);
+      alert(
+        "The value cannot exceed the remaining funds: " + currency + remaining
+      );
       setCost("");
       return;
     }
@@ -21,17 +33,10 @@ const AllocationForm = () => {
       name: name,
       cost: parseInt(cost),
     };
-    if (action === "Reduce") {
-      dispatch({
-        type: "RED_EXPENSE",
-        payload: expense,
-      });
-    } else {
-      dispatch({
-        type: "ADD_EXPENSE",
-        payload: expense,
-      });
-    }
+    dispatch({
+      type: "ADD_EXPENSE",
+      payload: expense,
+    });
   };
 
   return (
@@ -50,6 +55,7 @@ const AllocationForm = () => {
           >
             <option defaultValue>Choose...</option>
             <option value="Marketing" name="marketing">
+              {" "}
               Marketing
             </option>
             <option value="Sales" name="sales">
@@ -74,11 +80,7 @@ const AllocationForm = () => {
               Allocation
             </label>
           </div>
-          <select
-            className="custom-select"
-            id="inputGroupSelect02"
-            onChange={(event) => setAction(event.target.value)}
-          >
+          <select className="custom-select" id="inputGroupSelect02">
             <option defaultValue value="Add" name="Add">
               Add
             </option>
@@ -87,13 +89,16 @@ const AllocationForm = () => {
             </option>
           </select>
 
+          <div className="input-group-prepend" style={{ marginLeft: "2rem" }}>
+            <span className="input-group-text">{currency}</span>
+          </div>
           <input
             required="required"
-            type="number"
+            type="text"
             id="cost"
             value={cost}
             style={{ marginLeft: "2rem", size: 10 }}
-            onChange={(event) => setCost(event.target.value)}
+            onChange={handleCostChange}
           />
 
           <button
